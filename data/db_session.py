@@ -30,5 +30,4 @@ def global_init(db_file: str):
 
 def create_session() -> Session:
     global __factory
-    if __factory:
-        return __factory()
+    return __factory()
