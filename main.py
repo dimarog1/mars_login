@@ -7,9 +7,11 @@ from werkzeug.utils import redirect
 from data import db_session
 from data.news import News
 from data.users import User
+from data.works import Works
 from forms.loginform import LoginForm
 from forms.news import NewsForm
 from forms.user import RegisterForm
+from forms.work import WorkForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -23,13 +25,8 @@ app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(
 @app.route("/")
 def index():
     db_sess = db_session.create_session()
-    news = db_sess.query(News).filter(News.is_private != True)
-    if current_user.is_authenticated:
-        news = db_sess.query(News).filter(
-            (News.user == current_user) | (News.is_private != True))
-    else:
-        news = db_sess.query(News).filter(News.is_private != True)
-    return render_template("index.html", news=news)
+    works = db_sess.query(Works)
+    return render_template("index.html", news=works)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -46,9 +43,13 @@ def reqister():
                                    form=form,
                                    message="Такой пользователь уже есть")
         user = User(
+            surname=form.surname.data,
             name=form.name.data,
             email=form.email.data,
-            about=form.about.data
+            age=form.age.data,
+            position=form.position.data,
+            speciality=form.speciality.data,
+            address=form.address.data,
         )
         user.set_password(form.password.data)
         db_sess.add(user)
@@ -93,21 +94,41 @@ def logout():
     return redirect("/")
 
 
-@app.route('/news', methods=['GET', 'POST'])
+# @app.route('/news', methods=['GET', 'POST'])
+# @login_required
+# def add_news():
+#     form = NewsForm()
+#     if form.validate_on_submit():
+#         db_sess = db_session.create_session()
+#         news = News()
+#         news.title = form.title.data
+#         news.content = form.content.data
+#         news.is_private = form.is_private.data
+#         current_user.news.append(news)
+#         db_sess.merge(current_user)
+#         db_sess.commit()
+#         return redirect('/')
+#     return render_template('news.html', title='Добавление новости',
+#                            form=form)
+
+
+@app.route('/work', methods=['GET', 'POST'])
 @login_required
-def add_news():
-    form = NewsForm()
+def add_work():
+    form = WorkForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        news = News()
-        news.title = form.title.data
-        news.content = form.content.data
-        news.is_private = form.is_private.data
-        current_user.news.append(news)
+        works = Works()
+        works.title = form.title.data
+        works.leader_id = form.leader_id.data
+        works.work_size = form.work_size.data
+        works.collaborators = form.collaborators.data
+        works.is_finished = form.is_finished.data
+        current_user.works.append(works)
         db_sess.merge(current_user)
         db_sess.commit()
         return redirect('/')
-    return render_template('news.html', title='Добавление новости',
+    return render_template('work.html', title='Добавление новости',
                            form=form)
 
 
