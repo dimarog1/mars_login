@@ -1,17 +1,17 @@
 import datetime
 
-from flask import Flask, render_template, make_response, session, abort, request
+from flask import Flask, render_template, make_response, session, abort, request, jsonify
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.utils import redirect
 
-from data import db_session
+from data import db_session, jobs_api
 from data.news import News
 from data.users import User
-from data.works import Works
+from data.jobs import Jobs
 from forms.loginform import LoginForm
 from forms.news import NewsForm
 from forms.user import RegisterForm
-from forms.work import WorkForm
+from forms.job import JobForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -22,11 +22,16 @@ app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(
 )
 
 
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({'error': 'Not found'}), 404)
+
+
 @app.route("/")
 def index():
     db_sess = db_session.create_session()
-    works = db_sess.query(Works)
-    return render_template("index.html", news=works)
+    jobs = db_sess.query(Jobs)
+    return render_template("index.html", news=jobs)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -94,74 +99,61 @@ def logout():
     return redirect("/")
 
 
-# @app.route('/news', methods=['GET', 'POST'])
-# @login_required
-# def add_news():
-#     form = NewsForm()
-#     if form.validate_on_submit():
-#         db_sess = db_session.create_session()
-#         news = News()
-#         news.title = form.title.data
-#         news.content = form.content.data
-#         news.is_private = form.is_private.data
-#         current_user.news.append(news)
-#         db_sess.merge(current_user)
-#         db_sess.commit()
-#         return redirect('/')
-#     return render_template('news.html', title='Добавление новости',
-#                            form=form)
-
-
-@app.route('/work', methods=['GET', 'POST'])
+@app.route('/job', methods=['GET', 'POST'])
 @login_required
-def add_work():
-    form = WorkForm()
+def add_job():
+    form = JobForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        works = Works()
+        works = Jobs()
         works.title = form.title.data
         works.leader_id = form.leader_id.data
         works.work_size = form.work_size.data
         works.collaborators = form.collaborators.data
         works.is_finished = form.is_finished.data
-        current_user.works.append(works)
+        current_user.jobs.append(works)
         db_sess.merge(current_user)
         db_sess.commit()
         return redirect('/')
-    return render_template('work.html', title='Добавление новости',
+    return render_template('job.html', title='Добавление новости',
                            form=form)
 
 
-@app.route('/news/<int:id>', methods=['GET', 'POST'])
+@app.route('/jobs/<int:id>', methods=['GET', 'POST'])
 @login_required
-def edit_news(id):
-    form = NewsForm()
+def edit_job(id):
+    form = JobForm()
     if request.method == "GET":
         db_sess = db_session.create_session()
-        news = db_sess.query(News).filter(News.id == id,
-                                          News.user == current_user
+        job = db_sess.query(Jobs).filter(Jobs.id == id,
+                                          Jobs.user == current_user
                                           ).first()
-        if news:
-            form.title.data = news.title
-            form.content.data = news.content
-            form.is_private.data = news.is_private
+        if job:
+            form.title.data = job.title
+            form.leader_id.data = job.leader_id
+            form.work_size.data = job.work_size
+            form.collaborators.data = job.collaborators
+            form.is_finished.data = job.is_finished
         else:
             abort(404)
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        news = db_sess.query(News).filter(News.id == id,
-                                          News.user == current_user
+        job = db_sess.query(Jobs).filter(Jobs.id == id,
+                                          Jobs.user == current_user
                                           ).first()
-        if news:
-            news.title = form.title.data
-            news.content = form.content.data
-            news.is_private = form.is_private.data
+        if job:
+            job.title = form.title.data
+            job.leader_id = form.leader_id.data
+            job.work_size = form.work_size.data
+            job.collaborators = form.collaborators.data
+            job.is_finished = form.is_finished.data
+            print(job.title)
             db_sess.commit()
             return redirect('/')
         else:
             abort(404)
-    return render_template('news.html',
-                           title='Редактирование новости',
+    return render_template('job.html',
+                           title='Редактирование работы',
                            form=form
                            )
 
@@ -183,8 +175,7 @@ def news_delete(id):
 
 def main():
     db_session.global_init("db/blogs.db")
-    db_sess = db_session.create_session()
-    db_sess.commit()
+    app.register_blueprint(jobs_api.blueprint)
     app.run()
 
 
