@@ -158,15 +158,15 @@ def edit_job(id):
                            )
 
 
-@app.route('/news_delete/<int:id>', methods=['GET', 'POST'])
+@app.route('/job_delete/<int:id>', methods=['GET', 'POST'])
 @login_required
-def news_delete(id):
+def job_delete(id):
     db_sess = db_session.create_session()
-    news = db_sess.query(News).filter(News.id == id,
-                                      News.user == current_user
+    job = db_sess.query(Jobs).filter(Jobs.id == id,
+                                      Jobs.user == current_user
                                       ).first()
-    if news:
-        db_sess.delete(news)
+    if job:
+        db_sess.delete(job)
         db_sess.commit()
     else:
         abort(404)
