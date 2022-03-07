@@ -4,6 +4,7 @@ from flask import Flask, render_template, make_response, session, abort, request
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.utils import redirect
 
+import jobs_resources
 from data import db_session, jobs_api
 from data.news import News
 from data.users import User
@@ -12,19 +13,20 @@ from forms.loginform import LoginForm
 from forms.news import NewsForm
 from forms.user import RegisterForm
 from forms.job import JobForm
+from flask_restful import reqparse, abort, Api, Resource
 
 app = Flask(__name__)
+api = Api(app)
+
+api.add_resource(jobs_resources.JobsListResource, '/api/v2/jobs')
+api.add_resource(jobs_resources.JobsResource, '/api/v2/jobs/<int:news_id>')
+
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
 app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(
     days=365
 )
-
-
-@app.errorhandler(404)
-def not_found(error):
-    return make_response(jsonify({'error': 'Not found'}), 404)
 
 
 @app.route("/")
@@ -35,7 +37,7 @@ def index():
 
 
 @app.route('/register', methods=['GET', 'POST'])
-def reqister():
+def register():
     form = RegisterForm()
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
