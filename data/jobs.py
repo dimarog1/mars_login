@@ -16,6 +16,7 @@ class Jobs(SqlAlchemyBase, SerializerMixin):
     work_size = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     collaborators = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     is_finished = sqlalchemy.Column(sqlalchemy.Boolean, default=True)
+    is_published = sqlalchemy.Column(sqlalchemy.Boolean, default=True)
 
     user_id = sqlalchemy.Column(sqlalchemy.Integer,
                                 sqlalchemy.ForeignKey("users.id"))
