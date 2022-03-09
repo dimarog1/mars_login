@@ -28,6 +28,7 @@ login_manager.init_app(app)
 app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(
     days=365
 )
+app.register_blueprint(jobs_api.blueprint)
 
 
 @app.route("/")
@@ -129,8 +130,8 @@ def edit_job(id):
     if request.method == "GET":
         db_sess = db_session.create_session()
         job = db_sess.query(Jobs).filter(Jobs.id == id,
-                                          Jobs.user == current_user
-                                          ).first()
+                                         Jobs.user == current_user
+                                         ).first()
         if job:
             form.title.data = job.title
             form.leader_id.data = job.leader_id
@@ -142,8 +143,8 @@ def edit_job(id):
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         job = db_sess.query(Jobs).filter(Jobs.id == id,
-                                          Jobs.user == current_user
-                                          ).first()
+                                         Jobs.user == current_user
+                                         ).first()
         if job:
             job.title = form.title.data
             job.leader_id = form.leader_id.data
@@ -166,8 +167,8 @@ def edit_job(id):
 def job_delete(id):
     db_sess = db_session.create_session()
     job = db_sess.query(Jobs).filter(Jobs.id == id,
-                                      Jobs.user == current_user
-                                      ).first()
+                                     Jobs.user == current_user
+                                     ).first()
     if job:
         db_sess.delete(job)
         db_sess.commit()
@@ -178,6 +179,5 @@ def job_delete(id):
 
 if __name__ == '__main__':
     db_session.global_init("db/blogs.db")
-    app.register_blueprint(jobs_api.blueprint)
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
