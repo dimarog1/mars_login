@@ -1,34 +1,30 @@
-from requests import put
+from requests import get, post, delete
 
-# !---Корректный---!
-print(put('http://localhost:5000/api/jobs/2',
-           json={'title': 'Заголовок',
-                 'leader_id': 10,
-                 'work_size': 2,
-                 'collaborators': '13645',
-                 'is_finished': False}).json())
+# !---Корректныйе---!
+print(get('http://localhost:5000/api/v2/users').json())
+print(post('http://localhost:5000/api/v2/users',
+           json={'name': 'виталий',
+                 'surname': 'валогда',
+                 'age': '25',
+                 'position': 'позиция',
+                 'speciality': 'специалити',
+                 'address': 'марс',
+                 'email': '123@rofl.com'}).json())
+print(delete('http://localhost:5000/api/v2/users/1').json())
 
 # !---Некорректные---!
 
-# Отсутствует title
-print(put('http://localhost:5000/api/jobs',
-           json={'leader_id': 10,
-                 'work_size': 2,
-                 'collaborators': '13645',
-                 'is_finished': False}).json())
+# Id не существует
+print(get('http://localhost:5000/api/v2/users/213423423').json())
 
-# title должен быть строкой
-print(put('http://localhost:5000/api/jobs',
-           json={'title': 123,
-                 'leader_id': 10,
-                 'work_size': 2,
-                 'collaborators': '13645',
-                 'is_finished': False}).json())
+# Отсутствует age
+print(post('http://localhost:5000/api/v2/users',
+           json={'name': 'виталий',
+                 'surname': 'валогда',
+                 'position': 'позиция',
+                 'speciality': 'специалити',
+                 'address': 'марс',
+                 'email': '123@rofl.com'}).json())
 
-# leader_id должен быть числом
-print(put('http://localhost:5000/api/jobs',
-           json={'title': 'Заголовок',
-                 'leader_id': 'фыв',
-                 'work_size': 2,
-                 'collaborators': '13645',
-                 'is_finished': False}).json())
+# Id не существует
+print(delete('http://localhost:5000/api/v2/users/152649864684').json())

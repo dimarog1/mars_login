@@ -1,25 +1,24 @@
 import datetime
-
 from flask import Flask, render_template, make_response, session, abort, request, jsonify
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from flask_restful import reqparse, abort, Api, Resource
 from werkzeug.utils import redirect
 
-import jobs_resources
+import users_resource
 from data import db_session, jobs_api
+from data.jobs import Jobs
 from data.news import News
 from data.users import User
-from data.jobs import Jobs
+from forms.job import JobForm
 from forms.loginform import LoginForm
 from forms.news import NewsForm
 from forms.user import RegisterForm
-from forms.job import JobForm
-from flask_restful import reqparse, abort, Api, Resource
 
 app = Flask(__name__)
 api = Api(app)
 
-api.add_resource(jobs_resources.JobsListResource, '/api/v2/jobs')
-api.add_resource(jobs_resources.JobsResource, '/api/v2/jobs/<int:news_id>')
+api.add_resource(users_resource.UsersListResource, '/api/v2/users')
+api.add_resource(users_resource.UsersResource, '/api/v2/users/<int:user_id>')
 
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 login_manager = LoginManager()
@@ -128,8 +127,8 @@ def edit_job(id):
     if request.method == "GET":
         db_sess = db_session.create_session()
         job = db_sess.query(Jobs).filter(Jobs.id == id,
-                                          Jobs.user == current_user
-                                          ).first()
+                                         Jobs.user == current_user
+                                         ).first()
         if job:
             form.title.data = job.title
             form.leader_id.data = job.leader_id
@@ -141,8 +140,8 @@ def edit_job(id):
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         job = db_sess.query(Jobs).filter(Jobs.id == id,
-                                          Jobs.user == current_user
-                                          ).first()
+                                         Jobs.user == current_user
+                                         ).first()
         if job:
             job.title = form.title.data
             job.leader_id = form.leader_id.data
@@ -165,8 +164,8 @@ def edit_job(id):
 def job_delete(id):
     db_sess = db_session.create_session()
     job = db_sess.query(Jobs).filter(Jobs.id == id,
-                                      Jobs.user == current_user
-                                      ).first()
+                                     Jobs.user == current_user
+                                     ).first()
     if job:
         db_sess.delete(job)
         db_sess.commit()
