@@ -1,4 +1,5 @@
 import datetime
+import os
 
 from flask import Flask, render_template, make_response, session, abort, request, jsonify
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
@@ -175,11 +176,8 @@ def job_delete(id):
     return redirect('/')
 
 
-def main():
+if __name__ == '__main__':
     db_session.global_init("db/blogs.db")
     app.register_blueprint(jobs_api.blueprint)
-    app.run()
-
-
-if __name__ == '__main__':
-    main()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
