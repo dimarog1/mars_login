@@ -4,7 +4,7 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 from flask_restful import reqparse, abort, Api, Resource
 from werkzeug.utils import redirect
 
-import users_resource
+import users_resource, jobs_resources
 from data import db_session, jobs_api
 from data.jobs import Jobs
 from data.news import News
@@ -17,8 +17,8 @@ from forms.user import RegisterForm
 app = Flask(__name__)
 api = Api(app)
 
-api.add_resource(users_resource.UsersListResource, '/api/v2/users')
-api.add_resource(users_resource.UsersResource, '/api/v2/users/<int:user_id>')
+api.add_resource(jobs_resources.JobsListResource, '/api/v2/jobs')
+api.add_resource(jobs_resources.JobsResource, '/api/v2/jobs/<int:job_id>')
 
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 login_manager = LoginManager()
